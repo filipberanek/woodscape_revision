@@ -38,14 +38,12 @@ class TrainingBase:
                  txt_file_with_inputs,
                  dataset_root,
                  model_output_path,
-                 model_filename,
                  val_coeficient,
                  learning_rate,
                  number_of_epochs,
                  image_size,
                  batch_size) -> object:
         self.model_output_path = model_output_path
-        self.model_filename = model_filename
         self.learning_rate = learning_rate
         self.number_of_epochs = number_of_epochs
         self.val_coeficient = val_coeficient

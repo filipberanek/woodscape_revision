@@ -1,24 +1,18 @@
 from detectron2 import model_zoo
 from detectron2.utils.logger import setup_logger
-from detectron2.utils.visualizer import ColorMode
-from detectron2.utils.visualizer import Visualizer
-from detectron2.engine import DefaultPredictor
 from detectron2.engine import DefaultTrainer
 from detectron2.data import DatasetCatalog, MetadataCatalog
 from detectron2.config import get_cfg
 import warnings
-import random
 import GPUtil as GPU
 import os
 import humanize
 import psutil
 import torch
-import cv2
-import matplotlib.pyplot as plt
 import json
 import numpy as np
-import argparse
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 
 def get_gpu_status():
@@ -30,10 +24,15 @@ def get_gpu_status():
 
     def printm():
         process = psutil.Process(os.getpid())
-        print("Gen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
-              " | Proc size: " + humanize.naturalsize(process.memory_info().rss))
-        print("GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB".format(
-            gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal))
+        print(
+            "Gen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
+            " | Proc size: " + humanize.naturalsize(process.memory_info().rss),
+        )
+        print(
+            "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB".format(
+                gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+            )
+        )
 
     printm()
 
@@ -44,13 +43,17 @@ def get_dict(dict_file_path):
     return imgs_anns
 
 
-def train(root, model_output_path, dataset):
+def train(root, model_output_path, dataset, max_iteration):
     # Setup loger
     setup_logger()
 
     for d in [dataset]:
-        DatasetCatalog.register(f"mud_{dataset}", lambda d=d: get_dict(f"{root}/{d}.json"))
-        MetadataCatalog.get(f"mud_{dataset}").set(thing_classes=["clear", "transparent", "semi-transparent", "opaque"])
+        DatasetCatalog.register(
+            f"mud_{dataset}", lambda d=d: get_dict(f"{root}/{d}.json")
+        )
+        MetadataCatalog.get(f"mud_{dataset}").set(
+            thing_classes=["clear", "transparent", "semi-transparent", "opaque"]
+        )
 
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("Misc/semantic_R_50_FPN_1x.yaml"))
@@ -60,8 +63,8 @@ def train(root, model_output_path, dataset):
     # cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("Misc/semantic_R_50_FPN_1x.yaml")
     cfg.SOLVER.IMS_PER_BATCH = 5
     cfg.SOLVER.BASE_LR = 0.00025  # pick a good LR 0.00025
-    cfg.SOLVER.MAX_ITER = 50
-    cfg.SOLVER.WARMUP_ITERS = int(0.01*cfg.SOLVER.MAX_ITER)
+    cfg.SOLVER.MAX_ITER = max_iteration
+    cfg.SOLVER.WARMUP_ITERS = int(0.01 * cfg.SOLVER.MAX_ITER)
     # cfg.SOLVER.LR_FACTOR_FUNC = 0.01
     cfg.SOLVER.GAMMA = 0.5
     cfg.SOLVER.STEPS = [int(x) for x in np.linspace(0, cfg.SOLVER.MAX_ITER, 11)][1:-1]
@@ -80,6 +83,8 @@ def train(root, model_output_path, dataset):
 if __name__ == "__main__":
     get_gpu_status()
     root = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train"
-    model_output_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2"
+    model_output_path = (
+        r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2"
+    )
     dataset = "train_correct"
-    train(root, model_output_path, dataset)
+    train(root, model_output_path, dataset, 50)

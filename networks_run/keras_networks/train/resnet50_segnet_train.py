@@ -1,15 +1,43 @@
-from pathlib import Path
+import sys
+import os
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, dir_path)
 
 from keras_segmentation.models import segnet
 
-from networks_training.keras_networks.training_base import TrainingBase
-
-import tensorflow as tf
+from training_base import TrainingBase
 
 
 class PredefinedModel(TrainingBase):
+    def __init__(
+        self,
+        txt_file_with_inputs,
+        dataset_root,
+        model_output_path,
+        val_coeficient,
+        learning_rate,
+        number_of_epochs,
+        image_size,
+        batch_size,
+        encoder_level,
+    ) -> object:
+        super().__init__(
+            txt_file_with_inputs,
+            dataset_root,
+            model_output_path,
+            val_coeficient,
+            learning_rate,
+            number_of_epochs,
+            image_size,
+            batch_size,
+        )
+        self.encoder_level = encoder_level
+
     def model_load(self):
-        Segnet = segnet.resnet50_segnet(4, self.image_size, self.image_size, 3)
+        Segnet = segnet.resnet50_segnet(
+            4, self.image_size, self.image_size, self.encoder_level
+        )
         return self.extend_model(Segnet, 4, self.image_size)
 
 
@@ -24,5 +52,6 @@ if __name__ == "__main__":
         learning_rate=0.0001,
         number_of_epochs=1,
         image_size=512,
-        batch_size=2)
+        batch_size=2,
+    )
     model.train_model()

@@ -14,7 +14,8 @@ import numpy as np
 import pathlib
 from PIL import Image
 from tqdm import tqdm
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 
 def get_gpu_status():
@@ -26,10 +27,15 @@ def get_gpu_status():
 
     def printm():
         process = psutil.Process(os.getpid())
-        print("Gen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
-              " | Proc size: " + humanize.naturalsize(process.memory_info().rss))
-        print("GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB".format(
-            gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal))
+        print(
+            "Gen RAM Free: " + humanize.naturalsize(psutil.virtual_memory().available),
+            " | Proc size: " + humanize.naturalsize(process.memory_info().rss),
+        )
+        print(
+            "GPU RAM Free: {0:.0f}MB | Used: {1:.0f}MB | Util {2:3.0f}% | Total {3:.0f}MB".format(
+                gpu.memoryFree, gpu.memoryUsed, gpu.memoryUtil * 100, gpu.memoryTotal
+            )
+        )
 
     printm()
 
@@ -40,13 +46,10 @@ def get_dict(dict_file_path):
     return imgs_anns
 
 
-def train(images_folder_path,
-          model_path,
-          output_path):
+def predict(images_folder_path, model_path, output_path):
     # Create output folder
     output_path = pathlib.Path(output_path)
-    output_path.mkdir(parents=True,
-                      exist_ok=True)
+    output_path.mkdir(parents=True, exist_ok=True)
     # Setup loger
     setup_logger()
     cfg = get_cfg()
@@ -60,14 +63,18 @@ def train(images_folder_path,
         outputs = predictor(im)
         outputs = torch.argmax(outputs["sem_seg"].to("cpu"), dim=0)
         img = Image.fromarray(outputs.numpy().astype(np.uint8))
-        img.save(str(output_path/file_path.name))
+        img.save(str(output_path / file_path.name))
 
 
 if __name__ == "__main__":
     get_gpu_status()
     images_folder_path = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages"
     model_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/model_train/model_final.pth"
-    output_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/predictions"
-    train(images_folder_path=images_folder_path,
-          model_path=model_path,
-          output_path=output_path)
+    output_path = (
+        r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/predictions"
+    )
+    predict(
+        images_folder_path=images_folder_path,
+        model_path=model_path,
+        output_path=output_path,
+    )

@@ -4,15 +4,14 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path)
 
+from keras_pred_base import PredictBase
 from keras_segmentation.models import pspnet
-
-from training_base import TrainingBase
-
 
 from tensorflow.keras.models import Model
 
 
-class PredefinedModel(TrainingBase):
+class PredictResnetUnet(PredictBase):
+
     def extend_model(self, original_model, num_classes, image_size):
         # Use of downloaded model from https://github.com/divamgupta/image-segmentation-keras
         # Add a per-pixel classification layer
@@ -26,21 +25,20 @@ class PredefinedModel(TrainingBase):
         print(model.summary())
         return model
 
-    def model_load(self):
+    def load_model(self):
         Pspnet = pspnet.resnet50_pspnet(4, self.image_size, self.image_size)
         return self.extend_model(Pspnet, 4, self.image_size)
 
 
 if __name__ == "__main__":
-    # Initiate model with parameters
-    model = PredefinedModel(
-        txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/correct.txt",
-        dataset_root=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
-        model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs",
-        val_coeficient=0.1,
-        learning_rate=0.0001,
-        number_of_epochs=1,
-        image_size=473,
-        batch_size=2,
+    images_folder_path = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages"
+    model_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/model/checkpoint.model.h5"
+    output_path = (
+        r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/predictions"
     )
-    model.train_model()
+    PredictResnetUnet(
+        images_folder_path=images_folder_path,
+        model_path=model_path,
+        output_path=output_path,
+        image_size=473,
+    ).predict()
