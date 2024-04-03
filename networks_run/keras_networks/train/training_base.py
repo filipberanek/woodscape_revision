@@ -133,7 +133,7 @@ class TrainingBase:
         if not pathlib.Path(self.model_output_path).exists():
             pathlib.Path(self.model_output_path).mkdir(parents=True)
 
-        model_path = f"{self.model_output_path}/checkpoint.model.keras"
+        model_path = f"{self.model_output_path}/checkpoint.model.h5"
         train_images, val_images, train_masks, val_masks = train_test_split(
             self.list_of_iamges, self.list_of_labels, test_size=self.val_coeficient, random_state=42)
         # Put dataset into tensor
@@ -147,6 +147,7 @@ class TrainingBase:
                                      monitor="val_accuracy",
                                      mode="min",
                                      save_best_only=True,
+                                     save_weights_only=True,
                                      verbose=1)
 
         # Define callback for reducing learning rate if no change in loss over specified period

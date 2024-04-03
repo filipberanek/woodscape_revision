@@ -2,7 +2,7 @@ from pathlib import Path
 
 from keras_segmentation.models import unet
 
-from networks_training.keras_networks.training_base import TrainingBase
+from training_base import TrainingBase
 
 import tensorflow as tf
 
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     model = PredefinedModel(
         txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/correct.txt",
         dataset_root=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
-        model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs",
+        model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/model",
         model_filename="soiling",
         val_coeficient=0.1,
         learning_rate=0.0001,
