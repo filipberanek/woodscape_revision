@@ -23,18 +23,24 @@ def create_coco_annotation(lo_images, lo_labels, output_folder_path, keyword):
 
 if __name__ == "__main__":
     input_path = pathlib.Path(r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling")
-    # Run test
-    input_path_test = input_path / "test"
-    l_o_images = list((input_path_test / "rgbImages").rglob("*.png"))
-    l_o_labels = list((input_path_test / "gtLabels").rglob("*.png"))
-    create_coco_annotation(l_o_images, l_o_labels, input_path_test, "test")
+    # split = -497
     # Run train
     input_path_train = input_path / "train"
-    split = -497
-    l_o_images = list((input_path_test / "rgbImages").rglob("*.png"))[:split]
-    l_o_labels = list((input_path_test / "gtLabels").rglob("*.png"))[:split]
-    create_coco_annotation(l_o_images, l_o_labels, input_path_train, "train")
-    # Run val
-    l_o_images = list((input_path_test / "rgbImages").rglob("*.png"))[split:]
-    l_o_labels = list((input_path_test / "gtLabels").rglob("*.png"))[split:]
-    create_coco_annotation(l_o_images, l_o_labels, input_path_train, "val")
+    records = open(input_path_train/"correct.txt").readlines()
+    list_of_labels = [f"{input_path_train}{row.split(',')[1].strip()}" for row in records]
+    list_of_iamges = [f"{input_path_train}{row.split(',')[0].strip()}" for row in records]
+    create_coco_annotation(list_of_iamges, list_of_labels, input_path_train, "train_correct")
+    records = open(input_path_train/"correct_clear.txt").readlines()
+    list_of_labels = [f"{input_path_train}{row.split(',')[1].strip()}" for row in records]
+    list_of_iamges = [f"{input_path_train}{row.split(',')[0].strip()}" for row in records]
+    create_coco_annotation(list_of_iamges, list_of_labels, input_path_train, "train_correct_clear")
+    records = open(input_path_train/"correct_clear_strict.txt").readlines()
+    list_of_labels = [f"{input_path_train}{row.split(',')[1].strip()}" for row in records]
+    list_of_iamges = [f"{input_path_train}{row.split(',')[0].strip()}" for row in records]
+    create_coco_annotation(list_of_iamges, list_of_labels, input_path_train, "train_correct_clear_strict")
+    # Run test
+    # input_path_test = input_path / "test"
+    # records = open(input_path_train/"correct_clear_strict.txt").readlines()
+    # list_of_labels = [f"{input_path_test}{row.split(',')[1].strip()}" for row in records]
+    # list_of_iamges = [f"{input_path_test}{row.split(',')[0].strip()}" for row in records]
+    # create_coco_annotation(list_of_iamges, list_of_labels, input_path_train, "train_correct_clear_strict")
