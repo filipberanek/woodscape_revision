@@ -9,13 +9,15 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 from tensorflow.keras.callbacks import Callback
 import pandas as pd
+import wandb
 
 
 class CustomCallbacks(Callback):
     """Class inheriting from A paCallback to create new custom callback for training"""
 
-    def __init__(self):
+    def __init__(self, wandb_inst):
         super().__init__()
+        self.wandb_inst = wandb_inst
 
     def on_epoch_begin(self, epoch, logs=None):
         """This callback method will print actual learning rate
@@ -24,17 +26,18 @@ class CustomCallbacks(Callback):
             epoch (int): Number of actual epoch
             logs (object, optional): Previous logs. Defaults to None.
         """
+        self.wandb_inst.log({"lr": np.array(self.model.optimizer.learning_rate).item()})
         print("Current learning rate is:{:f}".format(np.array(self.model.optimizer.learning_rate).item()))
 
-    """
     def on_epoch_end(self, epoch, logs=None):
+        # wandb.log({"train loss": avg_loss, "epoch": epoch})
+        # wandb.log({"val accuracy": val_acc, "epoch": epoch})
+        # wandb.log({"val loss": val_loss, "epoch": epoch})
+        print()
         print(
             "The average loss for epoch {} is {:7.5f} "
-            "and mean absolute error is {:7.5f}.".format(
-                epoch, logs["loss"], logs["accuracy"]
-            )
+            "and mean absolute error is {:7.5f}.".format(epoch, logs["loss"], logs["accuracy"])
         )
-    """
 
 
 class TrainingBase:
@@ -53,6 +56,7 @@ class TrainingBase:
         width,
         height,
         batch_size,
+        wandb_inst,
     ) -> object:
         self.model_output_path = model_output_path
         self.learning_rate = learning_rate
@@ -60,6 +64,7 @@ class TrainingBase:
         self.width = width
         self.height = height
         self.batch_size = batch_size
+        self.wandb_inst = wandb_inst
         train_list_of_files = open(train_txt_file_with_inputs).readlines()
         val_list_of_files = open(val_txt_file_with_inputs).readlines()
         self.train_list_of_labels = [f"{dataset_root}/train{row.split(',')[1].strip()}" for row in train_list_of_files]
@@ -193,7 +198,7 @@ class TrainingBase:
             earlystop,
             checkpoint,
             lr_scheduler,
-            CustomCallbacks(),
+            CustomCallbacks(self.wandb_inst),
             tensorboard_callback,
         ]
 
