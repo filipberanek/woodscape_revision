@@ -12,7 +12,7 @@ from tensorflow.keras.models import Model
 
 
 class PredefinedModel(TrainingBase):
-    def extend_model(self, original_model, num_classes, image_size):
+    def extend_model(self, original_model):
         # Use of downloaded model from https://github.com/divamgupta/image-segmentation-keras
         # Add a per-pixel classification layer
         cut_layer_idx = -3  # remove last convolutional layer and 2d upsampling layer
@@ -27,20 +27,22 @@ class PredefinedModel(TrainingBase):
 
     def model_load(self):
         # input_height=473, input_width=473
-        Pspnet = pspnet.pspnet_101(4, self.image_size, self.image_size)
-        return self.extend_model(Pspnet, 4, self.image_size)
+        Pspnet = pspnet.pspnet_101(4, self.height, self.width)
+        return self.extend_model(Pspnet)
 
 
 if __name__ == "__main__":
     # Initiate model with parameters
     model = PredefinedModel(
-        txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/correct.txt",
+        train_txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/train_all_files.txt",
+        val_txt_file_with_inputs = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/val_all_files.txt",
         dataset_root=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
         model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs",
         val_coeficient=0.1,
         learning_rate=0.0001,
         number_of_epochs=1,
-        image_size=473,
+        width=473,
+        height=473,
         batch_size=2,
     )
     model.train_model()

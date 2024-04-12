@@ -12,43 +12,47 @@ from training_base import TrainingBase
 class PredefinedModel(TrainingBase):
     def __init__(
         self,
-        txt_file_with_inputs,
+        train_txt_file_with_inputs,
+        val_txt_file_with_inputs,
         dataset_root,
         model_output_path,
-        val_coeficient,
         learning_rate,
         number_of_epochs,
-        image_size,
+        width,
+        height,
         batch_size,
         encoder_level,
     ) -> object:
         super().__init__(
-            txt_file_with_inputs,
+            train_txt_file_with_inputs,
+            val_txt_file_with_inputs,
             dataset_root,
             model_output_path,
-            val_coeficient,
             learning_rate,
             number_of_epochs,
-            image_size,
+            width,
+            height,
             batch_size,
         )
         self.encoder_level = encoder_level
 
     def model_load(self):
-        Unet = unet.resnet50_unet(4, self.image_size, self.image_size, 3)
-        return self.extend_model(Unet, 4, self.image_size)
+        # Library is not changing number of params, so keep 3 as encoder level. 
+        Unet = unet.resnet50_unet(4, self.height, self.width, self.encoder_level)
+        return self.extend_model(Unet, 4)
 
 
 if __name__ == "__main__":
     # Initiate model with parameters
     model = PredefinedModel(
-        txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/correct.txt",
+        train_txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/train_all_files.txt",
+        val_txt_file_with_inputs = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/val_all_files.txt",
         dataset_root=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
         model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/model",
-        val_coeficient=0.1,
         learning_rate=0.0001,
         number_of_epochs=1,
-        image_size=512,
+        width=512,
+        height=512,
         batch_size=2,
         encoder_level=3,
     )

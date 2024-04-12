@@ -69,9 +69,9 @@ def predict(images_folder_path, model_path, output_path):
 if __name__ == "__main__":
     get_gpu_status()
     images_folder_path = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages"
-    model_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/model_train/model_final.pth"
+    model_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/detectron2_correct_clear_strict_files/model/model_final.pth"
     output_path = (
-        r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/predictions"
+        r"/home/fberanek/Desktop/learning/my_articles/outputs/detectron2/detectron2_correct_clear_strict_files/predictions"
     )
     predict(
         images_folder_path=images_folder_path,
