@@ -1,15 +1,16 @@
 import sys
 import os
+import argparse
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path)
 
 from keras_segmentation.models import segnet
-
 from training_base import TrainingBase
-
 from tensorflow.keras.models import Model
 from tensorflow.keras import layers
+import wandb
+
 
 class PredefinedModel(TrainingBase):
     def __init__(
@@ -20,10 +21,11 @@ class PredefinedModel(TrainingBase):
         model_output_path,
         learning_rate,
         number_of_epochs,
-        width,
-        height,
         batch_size,
-        encoder_level,
+        wandb_inst,
+        encoder_level=3,
+        width=512,
+        height=512,
     ) -> object:
         super().__init__(
             train_txt_file_with_inputs,
@@ -35,6 +37,7 @@ class PredefinedModel(TrainingBase):
             width,
             height,
             batch_size,
+            wandb_inst,
         )
         self.encoder_level = encoder_level
 
@@ -48,21 +51,14 @@ class PredefinedModel(TrainingBase):
             original_model.input,
             outputs=original_model.get_layer(cut_layer_name).output,
         )
-        if self.encoder_level>2:
-            for i in range(self.encoder_level-2):
+        if self.encoder_level > 2:
+            for i in range(self.encoder_level - 2):
                 if i == 0:
-                    model = layers.UpSampling2D(2, interpolation="bilinear")(
-                        model.output
-                    )
-                else: 
-                    model = layers.UpSampling2D(2, interpolation="bilinear")(
-                        model
-                    )
-                model = layers.Conv2D(
-                    4, kernel_size=(1, 1), activation="softmax", padding="same"
-                )(model)
-            model = Model(original_model.input,
-                outputs=model)
+                    model = layers.UpSampling2D(2, interpolation="bilinear")(model.output)
+                else:
+                    model = layers.UpSampling2D(2, interpolation="bilinear")(model)
+                model = layers.Conv2D(4, kernel_size=(1, 1), activation="softmax", padding="same")(model)
+            model = Model(original_model.input, outputs=model)
         print(model.summary())
         return model
 
@@ -73,17 +69,58 @@ class PredefinedModel(TrainingBase):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train resnet50 segnet")
+    parser.add_argument(
+        "--train_txt_file_with_inputs",
+        help="Full file path to the txt file with list of training file names",
+        default=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/train_all_files.txt",
+    )
+    parser.add_argument(
+        "--val_txt_file_with_inputs",
+        help="Full file path to the txt file with list of training file names",
+        default=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/val_all_files.txt",
+    )
+    parser.add_argument(
+        "--dataset_root",
+        help="Size of the image. Ration is 1:1, so provided value" "resolution should be as image_size:image_size",
+        default=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
+    )
+    parser.add_argument(
+        "--model_path",
+        help="Folder path, where sould be stored models",
+        default=r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/model/resnet50_segnet",
+    )
+    parser.add_argument("--learning_rate", default=0.001, type=float, help="Model learning rate")
+    parser.add_argument("--number_of_epochs", default=1, help="Number of epochs for model training")
+    parser.add_argument(
+        "--width",
+        type=int,
+        default=512,
+        help="Image and label width",
+    )
+    parser.add_argument(
+        "--height",
+        type=int,
+        default=512,
+        help="Image and label height",
+    )
+    parser.add_argument("--batch_size", type=int, default=2, help="Batch size for training")
+    parser.add_argument("--wandb_project", type=str, default="Occlusion_detector", help="Wandb project name")
+    args = parser.parse_args()
+    # Initiate model with parameters
+    wandb.login()
+    wandb.init(project=args.wandb_project)
     # Initiate model with parameters
     model = PredefinedModel(
-        train_txt_file_with_inputs=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/train_all_files.txt",
-        val_txt_file_with_inputs = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/train/val_all_files.txt",
-        dataset_root=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling",
-        model_output_path=r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/model",
-        learning_rate=0.0001,
-        number_of_epochs=1,
-        width=512,
-        height=512,
-        batch_size=2,
-        encoder_level=5,
+        train_txt_file_with_inputs=args.train_txt_file_with_inputs,
+        val_txt_file_with_inputs=args.val_txt_file_with_inputs,
+        dataset_root=args.dataset_root,
+        model_output_path=args.model_path,
+        learning_rate=args.learning_rate,
+        number_of_epochs=args.number_of_epochs,
+        width=args.width,
+        height=args.height,
+        batch_size=args.config.batch_size,
+        wandb_inst=wandb,
     )
     model.train_model()

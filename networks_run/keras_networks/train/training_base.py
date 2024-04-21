@@ -30,14 +30,9 @@ class CustomCallbacks(Callback):
         print("Current learning rate is:{:f}".format(np.array(self.model.optimizer.learning_rate).item()))
 
     def on_epoch_end(self, epoch, logs=None):
-        # wandb.log({"train loss": avg_loss, "epoch": epoch})
-        # wandb.log({"val accuracy": val_acc, "epoch": epoch})
-        # wandb.log({"val loss": val_loss, "epoch": epoch})
-        print()
-        print(
-            "The average loss for epoch {} is {:7.5f} "
-            "and mean absolute error is {:7.5f}.".format(epoch, logs["loss"], logs["accuracy"])
-        )
+        print(f"For epoch:{epoch}, are metrics: {logs}")
+        for metric in logs.items():
+            self.wandb_inst.log({metric[0]: metric[1]})
 
 
 class TrainingBase:

@@ -163,3 +163,4 @@ venv
 *.png
 /output
 /test_inputs
+.vscode
