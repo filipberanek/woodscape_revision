@@ -1,3 +1,8 @@
+"""
+Keras segmentation has been implemented according: 
+https://github.com/divamgupta/image-segmentation-keras
+"""
+
 import pathlib
 
 import tensorflow as tf

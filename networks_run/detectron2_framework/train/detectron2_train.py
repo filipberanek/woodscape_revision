@@ -322,12 +322,13 @@ class Detectron2Trainer:
         setup_logger()
 
         for d in [self.train_txt_file_with_inputs, self.val_txt_file_with_inputs]:
-            DatasetCatalog.register(f"mud_{d.stem}", lambda d=d: get_dict(d))
-            MetadataCatalog.get(f"mud_{d.stem}").set(
-                thing_classes=["clear", "transparent", "semi-transparent", "opaque"],
-                stuff_classes=["clear", "transparent", "semi-transparent", "opaque"],
-                ignore_label=False,
-            )
+            if not (f"mud_{d.stem}" in MetadataCatalog.data.keys()):
+                DatasetCatalog.register(f"mud_{d.stem}", lambda d=d: get_dict(d))
+                MetadataCatalog.get(f"mud_{d.stem}").set(
+                    thing_classes=["clear", "transparent", "semi-transparent", "opaque"],
+                    stuff_classes=["clear", "transparent", "semi-transparent", "opaque"],
+                    ignore_label=False,
+                )
         set_seed()
         cfg = get_cfg()
         cfg.merge_from_file(model_zoo.get_config_file("Misc/semantic_R_50_FPN_1x.yaml"))

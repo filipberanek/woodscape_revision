@@ -13,7 +13,7 @@ from keras_networks.train import (
 from detectron2_framework.train.detectron2_train import Detectron2Trainer
 
 # Define script variables
-LIST_OF_FILES_FOR_TRAIN_VAL = ["correct_clear_strict_files"]  # "all_files", "correct_files", "correct_clear_files",
+LIST_OF_FILES_FOR_TRAIN_VAL = ["correct_files", "correct_clear_files", "correct_clear_strict_files"]  # "all_files",
 LIST_OF_NETWORKS_KERAS = [
     resnet50_unet_train,
     psp_101_train,
@@ -26,9 +26,9 @@ DF_OF_NETWORKS = pd.DataFrame(
 )
 
 KERAS_START_LR = 0.01
-NUMBER_OF_EPOCHS = 1
+NUMBER_OF_EPOCHS = 400
 RUN_KERAS = True
-RUN_DETECTRON = True
+RUN_DETECTRON = False
 # log into W&
 wandb.login()
 
@@ -71,7 +71,7 @@ def objective_detectron2(config):
         val_txt_file_with_inputs=txt_val_file,
         model_output_path=models_output
         / f"{config['framework']}"
-        / f"{config['framework']}_{config['dataset']}"
+        / f"{config['framework']}_batch_size_per_image_{config['batch_size_per_image']}_{config['dataset']}"
         / "model",
         learning_rate=config["learning_rate"],
         number_of_epochs=config["number_of_epchs"],
@@ -105,25 +105,28 @@ if __name__ == "__main__":
             # 1: Define objective/training function
 
             # 2: Define the search space
+            """
+            "batch_size_per_image": {
+                # with evenly-distributed logarithms
+                "distribution": "int_uniform",
+                # "q": 64,
+                "min": 128,
+                "max": 512,
+            },
+            """
             sweep_configuration = {
                 "method": "random",
-                "name": f"Detectron2_{dataset_name}",
+                "name": f"Detectron2_batch_size_per_image_{dataset_name}",
                 "metric": {"name": "val_accuracy", "goal": "maximize"},
                 "dataset": dataset_name,
                 "parameters": {
-                    "images_per_batch": {"value": 16},
-                    "batch_size_per_image": {
-                        # with evenly-distributed logarithms
-                        "distribution": "int_uniform",
-                        # "q": 64,
-                        "min": 128,
-                        "max": 512,
-                    },
+                    "images_per_batch": {"value": 8},
+                    "batch_size_per_image": {"value": 128},
                     "dataset": {"value": dataset_name},
                     "train_data_root": {"value": args.train_data_root},
                     "models_output": {"value": args.models_output},
                     "learning_rate": {"value": KERAS_START_LR},
-                    "number_of_epchs": {"value": NUMBER_OF_EPOCHS * 10},
+                    "number_of_epchs": {"value": NUMBER_OF_EPOCHS * 5},
                     "framework": {"value": "Detectron2"},
                 },
             }
