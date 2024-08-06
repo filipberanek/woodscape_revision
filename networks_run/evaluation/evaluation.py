@@ -1,7 +1,7 @@
 import pathlib
+import argparse
+
 from tqdm import tqdm
-
-
 import pandas as pd
 import numpy as np
 import seaborn as sn
@@ -125,16 +125,20 @@ def run_evaluation(
 
 
 if __name__ == "__main__":
-    prediction_path = pathlib.Path(
-        r"/home/fberanek/Desktop/learning/my_articles/outputs/segformer/segformer_b0_finetuned_ade_512_512/predictions"
-    )
+    parser = argparse.ArgumentParser(description="Evaluate predictions")
+    parser.add_argument("--predictions_path", help="Path to the predictions", required=True, type=str)
+    parser.add_argument("--annotations_path", help="Path to the annotations", required=True, type=str)
+    parser.add_argument("--img_path", help="Path to the input images", type=str, required=True)
+    parser.add_argument("--output_path", help="Output path, where should be stored results", type=str, required=True)
+    args = parser.parse_args()
+
     run_evaluation(
-        prediction_path=str(prediction_path),
-        annotation_path=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/gtLabels",
-        img_path=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages",
-        output_path=str(prediction_path.parent / "evaluations"),
+        prediction_path=args.predictions_path,
+        annotation_path=args.annotations_path,
+        img_path=args.img_path,
+        output_path=args.output_path,
         width=512,
         height=512,
         cls_names=["Clear", "Transparent", "Semi-Transparent", "Opaque"],
-        predictions_display=False,
+        predictions_display=False,  # Whether predictions should be displayed with mask or not
     )

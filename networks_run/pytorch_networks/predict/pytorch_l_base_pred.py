@@ -84,18 +84,14 @@ if __name__ == "__main__":
     """
     parser = argparse.ArgumentParser(description="Predict with pytorch segmentation network")
     parser.add_argument(
-        "--images_input_path",
-        help="Full file path to the txt file with list of training file names",
-        default=r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages",
+        "--images_input_path", help="Full file path to the txt file with list of training file names", required=True
     )
     parser.add_argument(
-        "--model_path",
-        help="Full file path to the txt file with list of training file names",
-        default=r"/home/fberanek/Desktop/learning/my_articles/outputs/pytorch_networks/fpn_resnet152_torch_cross_entropy_all_files/model/fpn_resnet152/fpn_resnet152.ckpt",
+        "--model_path", help="Full file path to the txt file with list of training file names", required=True
     )
-    parser.add_argument("--network_architecture", type=str, default="fpn")
-    parser.add_argument("--encoder", type=str, default="resnet152")
-    parser.add_argument("--wandb_project", type=str, default="Occlusion_detector", help="Wandb project name")
+    parser.add_argument("--network_architecture", type=str, required=True)
+    parser.add_argument("--encoder", type=str, required=True)
+    parser.add_argument("--wandb_project", type=str, required=True, help="Wandb project name")
     args = parser.parse_args()
     images_input_path = pathlib.Path(args.images_input_path)
     model_path = pathlib.Path(args.model_path)
