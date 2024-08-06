@@ -1,5 +1,6 @@
 import sys
 import os
+import pathlib
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_path)
@@ -16,8 +17,11 @@ class PredictResnetUnet(PredictBase):
 
 if __name__ == "__main__":
     images_folder_path = r"/home/fberanek/Desktop/datasets/segmentation/semantic/new_soiling/test/rgbImages"
-    model_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/resnet50_unet_train_enc_correct_clear_strict_files/model/checkpoint.model.h5"
-    output_path = r"/home/fberanek/Desktop/learning/my_articles/outputs/keras/resnet50_unet_train_enc_correct_clear_strict_files/predictions"
+    model_path_root = pathlib.Path(
+        r"/home/fberanek/Desktop/learning/my_articles/outputs/keras_networks/resnet50_unet_train_correct_clear_strict_files"
+    )
+    model_path = model_path_root / "model" / "checkpoint.model.h5"
+    output_path = model_path_root / "predictions"
     PredictResnetUnet(
         images_folder_path=images_folder_path,
         model_path=model_path,
